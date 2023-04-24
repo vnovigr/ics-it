@@ -1,22 +1,35 @@
 DROP DATABASE IF EXISTS dbo;
-CREATE DATABASE dbo;
+CREATE DATABASE IF NOT EXISTS dbo;
+USE dbo;
 
-DROP TABLE IF EXISTS SKU;
-CREATE TABLE SKU(
+CREATE TABLE IF NOT EXISTS dbo.SKU(
 	ID_Identity BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, 
     Code VARCHAR(45) UNIQUE,
     Name VARCHAR(30)
 );
 
-DROP TABLE IF EXISTS Family;
-CREATE TABLE Family(
+-- Установка разделителя для определения хранимой процедуры
+DELIMITER $$
+
+-- Создание хранимой процедуры для добавления новых записей и вычисления кода
+CREATE PROCEDURE AddSKU(IN product_name VARCHAR(255))
+BEGIN
+    INSERT INTO SKU (Name) VALUES (product_name);
+    SET @new_id = LAST_INSERT_ID();
+    SET @new_code = CONCAT('s', @new_id);
+    UPDATE SKU SET Code = @new_code WHERE ID = @new_id;
+END $$
+
+-- Восстановление стандартного разделителя
+DELIMITER ;
+
+CREATE TABLE IF NOT EXISTS Family(
 	ID_Identity BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     SurName VARCHAR(45),
     BudgetValue INT
 );
 
-DROP TABLE IF EXISTS Basket;
-CREATE TABLE Basket(
+CREATE TABLE IF NOT EXISTS Basket(
 	ID_Identity BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     ID_SKU BIGINT UNSIGNED NOT NULL,
     ID_Family BIGINT UNSIGNED NOT NULL,
